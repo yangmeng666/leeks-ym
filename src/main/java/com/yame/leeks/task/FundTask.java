@@ -121,6 +121,7 @@ public class FundTask {
             // 将整数格式化为5位数字
             newEquipmentNo = String.format(equipmentType + "%04d", newEquipment);
         }
+
         return newEquipmentNo;
     }
 
