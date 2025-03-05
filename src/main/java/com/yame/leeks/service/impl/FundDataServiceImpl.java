@@ -133,11 +133,7 @@ public class FundDataServiceImpl extends ServiceImpl<FundDataMapper, FundData> i
                 }
             }
         } catch (Exception e) {
-            try {
-                log.info(new String("请求失败的历史净值".getBytes("UTF-8"), "GBK")+"uri:{}", uri);
-            } catch (UnsupportedEncodingException ex) {
-                throw new RuntimeException(ex);
-            }
+                log.info("请求失败的历史净值 uri:{}", uri);
         }
         //JSONObject lzjz = new JSONObject();
         //lzjz.set("name", "lzjzExecutor");

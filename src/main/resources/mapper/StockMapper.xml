@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yame.leeks.mapper.StockMapper">
+
+    <insert id="saveOrUpdateBySymbol">
+        INSERT INTO stock (id, symbol, code, name,market_type, exchange, sectors, settlement, trade, price_change,
+                           change_percent, open, high, low, volume, amount,inside_dish,outer_disc, tick_time, turnover_ratio, update_time)
+        VALUES (#{id}, #{symbol}, #{code}, #{name},#{marketType},#{exchange}, #{sectors}, #{settlement}, #{trade}, #{priceChange},
+                #{changePercent}, #{open}, #{high}, #{low}, #{volume}, #{amount},#{insideDish},#{outerDisc}, #{tickTime}, #{turnoverRatio},
+                NOW()) ON DUPLICATE KEY
+        UPDATE
+            code =
+        VALUES (code), name =
+        VALUES (name),  market_type =
+        VALUES (market_type),  exchange =
+        VALUES (exchange), sectors =
+        VALUES (sectors), settlement =
+        VALUES (settlement), trade =
+        VALUES (trade), price_change =
+        VALUES (price_change), change_percent =
+        VALUES (change_percent), open =
+        VALUES (open), high =
+        VALUES (high), low =
+        VALUES (low), volume =
+        VALUES (volume), amount =
+        VALUES (amount),  inside_dish =
+        VALUES (inside_dish),  outer_disc =
+        VALUES (outer_disc), tick_time =
+        VALUES (tick_time), turnover_ratio =
+        VALUES (turnover_ratio), update_time = NOW();
+    </insert>
+    <select id="saveOrUpdateBatchBySymbol">
+        INSERT INTO stock (id, symbol, code, name,market_type, exchange, sectors, settlement, trade, price_change,
+        change_percent, open, high, low, volume, amount, inside_dish, outer_disc, tick_time, turnover_ratio, update_time)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.id}, #{item.symbol}, #{item.code}, #{item.name},#{item.marketType},#{item.exchange}, #{item.sectors}, #{item.settlement},
+            #{item.trade}, #{item.priceChange}, #{item.changePercent}, #{item.open}, #{item.high},
+            #{item.low}, #{item.volume}, #{item.amount},#{item.insideDish},#{item.outerDisc}, #{item.tickTime}, #{item.turnoverRatio}, NOW())
+        </foreach>
+        ON DUPLICATE KEY
+        UPDATE
+        code =
+        VALUES (code), name =
+        VALUES (name), market_type =
+        VALUES (market_type),  exchange =
+        VALUES (exchange), sectors =
+        VALUES (sectors), settlement =
+        VALUES (settlement), trade =
+        VALUES (trade), price_change =
+        VALUES (price_change), change_percent =
+        VALUES (change_percent), open =
+        VALUES (open), high =
+        VALUES (high), low =
+        VALUES (low), volume =
+        VALUES (volume), amount =
+        VALUES (amount), inside_dish =
+        VALUES (inside_dish),  outer_disc =
+        VALUES (outer_disc), tick_time =
+        VALUES (tick_time), turnover_ratio =
+        VALUES (turnover_ratio), update_time = NOW();
+    </select>
+</mapper>

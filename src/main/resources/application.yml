@@ -26,7 +26,7 @@ spring:
 ttjj:
   enable: true
   init: false
-  lzjz_init: true
+  lzjz_init: false
   url:
     # 基金实时信息 http://fundgz.1234567.com.cn/js/001186.js?rt=1463558676006
     last_gsjz: http://fundgz.1234567.com.cn/js/
