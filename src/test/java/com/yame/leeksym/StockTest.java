@@ -11,7 +11,9 @@ import com.yame.leeks.LeeksYmApplication;
 import com.yame.leeks.entity.Stock;
 import com.yame.leeks.enums.ExchangeEnum;
 import com.yame.leeks.enums.MarketTypeEnum;
+import com.yame.leeks.service.StockDataService;
 import com.yame.leeks.service.StockService;
+import com.yame.leeks.task.StockTask;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeanUtils;
@@ -39,10 +41,14 @@ import java.util.stream.Collectors;
 @SpringBootTest(classes = LeeksYmApplication.class)
 public class StockTest extends AbstractTestNGSpringContextTests {
 
-    private HashMap<String, String[]> codeMap = new HashMap<>();
 
     @Autowired
     private StockService stockService;
+    @Autowired
+    private StockDataService stockDataService;
+
+    @Autowired
+    private StockTask stockTask;
 
 
     /**
@@ -183,6 +189,15 @@ public class StockTest extends AbstractTestNGSpringContextTests {
         //log.info("stocks.size() :{} stocks:{},", stocks.size(),stocks);
 
 
+    }
+
+    @Test
+    public void testInsertStockDatas() {
+        stockDataService.insertRealDatas();
+    }
+    @Test
+    public void testStockTaskDayData() {
+        stockTask.updateStockDayData();
     }
 
     public List<Stock> parseStock(String data) {

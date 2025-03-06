@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yame.leeks.mapper.StockDataMapper">
+
+    <insert id="saveBatchList" parameterType="java.util.List">
+        INSERT INTO stock_data (id, code, trade, price_change, change_percent, open, high, low, volume, amount,
+        inside_dish, outer_disc, turnover_ratio, tick_time, update_time)
+        VALUES
+        <foreach collection="list" item="stock" separator=",">
+            (#{stock.id}, #{stock.code}, #{stock.trade}, #{stock.priceChange}, #{stock.changePercent}, #{stock.open},
+            #{stock.high}, #{stock.low}, #{stock.volume}, #{stock.amount}, #{stock.insideDish}, #{stock.outerDisc},
+            #{stock.turnoverRatio}, #{stock.tickTime}, #{stock.updateTime})
+        </foreach>
+    </insert>
+    <insert id="insertOrUpdateDayDatas">
+        INSERT INTO stock_day_data (id, code, trade, price_change, change_percent, open, high, low, volume, amount,
+        inside_dish, outer_disc, turnover_ratio, tick_time, update_time)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.id}, #{item.code}, #{item.trade}, #{item.priceChange}, #{item.changePercent}, #{item.open},
+            #{item.high},
+            #{item.low}, #{item.volume}, #{item.amount},#{item.insideDish},#{item.outerDisc},
+            #{item.turnoverRatio},#{item.tickTime}, NOW())
+        </foreach>
+        ON DUPLICATE KEY
+        UPDATE
+        code =
+        VALUES (code), trade =
+        VALUES (trade), price_change =
+        VALUES (price_change), change_percent =
+        VALUES (change_percent), open =
+        VALUES (open), high =
+        VALUES (high), low =
+        VALUES (low), volume =
+        VALUES (volume), amount =
+        VALUES (amount), inside_dish =
+        VALUES (inside_dish), outer_disc =
+        VALUES (outer_disc), tick_time =
+        VALUES (tick_time), turnover_ratio =
+        VALUES (turnover_ratio), update_time = NOW();
+    </insert>
+    <select id="haveStockDayDataByDate" resultType="java.lang.Boolean">
+        SELECT COUNT(1)>0 FROM stock_day_data WHERE tick_time = #{today}
+    </select>
+</mapper>

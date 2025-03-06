@@ -29,7 +29,7 @@
         VALUES (tick_time), turnover_ratio =
         VALUES (turnover_ratio), update_time = NOW();
     </insert>
-    <select id="saveOrUpdateBatchBySymbol">
+    <insert id="saveOrUpdateBatchBySymbol">
         INSERT INTO stock (id, symbol, code, name,market_type, exchange, sectors, settlement, trade, price_change,
         change_percent, open, high, low, volume, amount, inside_dish, outer_disc, tick_time, turnover_ratio, update_time)
         VALUES
@@ -59,5 +59,5 @@
         VALUES (outer_disc), tick_time =
         VALUES (tick_time), turnover_ratio =
         VALUES (turnover_ratio), update_time = NOW();
-    </select>
+    </insert>
 </mapper>

@@ -61,7 +61,7 @@ public class StockServiceImpl extends ServiceImpl<StockMapper, Stock> implements
             new Thread(() -> {
                 String codes = String.join(",", strings);
                 URI uri = URI.create("http://qt.gtimg.cn/q=" + codes);
-                log.info("strings.size() :{} ,uri :{}", strings.size(),uri);
+                //log.info("strings.size() :{} ,uri :{}", strings.size(),uri);
                 ResponseEntity<String> entity = restTemplate.getForEntity(uri, String.class);
                 List<Stock> stocks = parseStock(entity.getBody());
                 for (Stock stock : stocks) {
@@ -69,7 +69,7 @@ public class StockServiceImpl extends ServiceImpl<StockMapper, Stock> implements
                         stock.setId(dbStockMap.get(stock.getSymbol()).getId());
                     }
                 }
-                saveOrUpdateBatchBySymbol(dbStockMap.values().stream().collect(Collectors.toList()));
+                saveOrUpdateBatchBySymbol(stocks);
                 countDownLatch.countDown();
             }).start();
         }
