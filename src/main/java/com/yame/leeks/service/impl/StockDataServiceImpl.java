@@ -138,7 +138,7 @@ public class StockDataServiceImpl extends ServiceImpl<StockDataMapper, StockData
             // 创建 Stock 对象
             StockData stockData = new StockData();
             // 解析字段
-            stockData.setCode(fields[2]);   // 股票代码
+            stockData.setSymbol(fields[2]);   // 股票代码
             stockData.setTrade(new BigDecimal(fields[3]));      // 当前交易价格
             stockData.setPriceChange(new BigDecimal(fields[31])); // 涨跌
             stockData.setChangePercent(new BigDecimal(fields[32])); // 涨跌幅

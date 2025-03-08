@@ -3,29 +3,29 @@
 <mapper namespace="com.yame.leeks.mapper.StockDataMapper">
 
     <insert id="saveBatchList" parameterType="java.util.List">
-        INSERT INTO stock_data (id, code, trade, price_change, change_percent, open, high, low, volume, amount,
+        INSERT INTO stock_data (id, symbol, trade, price_change, change_percent, open, high, low, volume, amount,
         inside_dish, outer_disc, turnover_ratio, tick_time, update_time)
         VALUES
         <foreach collection="list" item="stock" separator=",">
-            (#{stock.id}, #{stock.code}, #{stock.trade}, #{stock.priceChange}, #{stock.changePercent}, #{stock.open},
+            (#{stock.id}, #{stock.symbol}, #{stock.trade}, #{stock.priceChange}, #{stock.changePercent}, #{stock.open},
             #{stock.high}, #{stock.low}, #{stock.volume}, #{stock.amount}, #{stock.insideDish}, #{stock.outerDisc},
             #{stock.turnoverRatio}, #{stock.tickTime}, #{stock.updateTime})
         </foreach>
     </insert>
     <insert id="insertOrUpdateDayDatas">
-        INSERT INTO stock_day_data (id, code, trade, price_change, change_percent, open, high, low, volume, amount,
+        INSERT INTO stock_day_data (id, symbol, trade, price_change, change_percent, open, high, low, volume, amount,
         inside_dish, outer_disc, turnover_ratio, tick_time, update_time)
         VALUES
         <foreach collection="list" item="item" separator=",">
-            (#{item.id}, #{item.code}, #{item.trade}, #{item.priceChange}, #{item.changePercent}, #{item.open},
+            (#{item.id}, #{item.symbol}, #{item.trade}, #{item.priceChange}, #{item.changePercent}, #{item.open},
             #{item.high},
             #{item.low}, #{item.volume}, #{item.amount},#{item.insideDish},#{item.outerDisc},
             #{item.turnoverRatio},#{item.tickTime}, NOW())
         </foreach>
         ON DUPLICATE KEY
         UPDATE
-        code =
-        VALUES (code), trade =
+        symbol =
+        VALUES (symbol), trade =
         VALUES (trade), price_change =
         VALUES (price_change), change_percent =
         VALUES (change_percent), open =
@@ -42,7 +42,7 @@
     <insert id="createHourTable">
         CREATE TABLE if not exists `stock_data_${todayTable}` (
              `id` bigint NOT NULL COMMENT '主键ID',
-             `code` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '股票代码',
+             `symbol` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '股票代码',
              `trade` decimal(10,3) NOT NULL COMMENT '当前交易价格',
              `price_change` decimal(10,3) NOT NULL COMMENT '涨跌',
              `change_percent` decimal(10,3) NOT NULL COMMENT '涨跌幅',

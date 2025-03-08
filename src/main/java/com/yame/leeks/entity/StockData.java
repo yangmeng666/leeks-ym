@@ -34,8 +34,8 @@ public class StockData {
     @Id
     @TableId(value = "id",type = IdType.INPUT)
     private Long id;
-    // 股票代码
-    private String code;
+    // 完整股票代码
+    private String symbol;
     // 当前交易价格
     private BigDecimal trade;
     //涨跌额（当前价 - 昨日收盘价）
