@@ -30,4 +30,25 @@ public interface StockDataService extends IService<StockData> {
      * @return
      */
     boolean haveStockDayDataByDate(String date);
+
+    /**
+     * 实际判断表是否存在
+     * @param date yyyy_MM_dd
+     * @return
+     */
+    boolean haveStockHourTableByDate(String date);
+
+    /**
+     * 股票小时粒度表中是否有当天数据
+     * @param todayTable
+     * @param date
+     * @return
+     */
+    boolean haveStockHourDataByDate(String todayTable,String date);
+
+    void createHourTable(String todayTable);
+
+    int insertHourData(String tableName, String date);
+
+    void insertStockHourData(String today);
 }

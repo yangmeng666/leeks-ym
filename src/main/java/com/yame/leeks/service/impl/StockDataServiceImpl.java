@@ -1,6 +1,7 @@
 package com.yame.leeks.service.impl;
 
 import cn.hutool.core.collection.ListUtil;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yame.leeks.entity.Stock;
@@ -8,6 +9,7 @@ import com.yame.leeks.entity.StockData;
 import com.yame.leeks.mapper.StockDataMapper;
 import com.yame.leeks.service.StockDataService;
 import com.yame.leeks.service.StockService;
+import com.yame.leeks.utils.CommonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -84,6 +86,47 @@ public class StockDataServiceImpl extends ServiceImpl<StockDataMapper, StockData
     public boolean haveStockDayDataByDate(String date) {
         return this.baseMapper.haveStockDayDataByDate(date);
     }
+
+    @Override
+    public boolean haveStockHourTableByDate(String date) {
+        return this.baseMapper.haveStockHourTableByDate(date);
+    }
+
+    @Override
+    public boolean haveStockHourDataByDate(String todayTable, String date) {
+        return this.baseMapper.haveStockHourDataByDate(todayTable, date);
+    }
+
+    @Override
+    public void createHourTable(String todayTable) {
+        this.baseMapper.createHourTable(todayTable);
+    }
+
+    @Override
+    public int insertHourData(String tableName, String date) {
+        return this.baseMapper.insertHourData(tableName, date);
+    }
+
+    @Override
+    public void insertStockHourData(String date) {
+        if (StrUtil.isBlank(date)) {
+            date = DateUtil.today();
+        }
+        String todayTable = DateUtil.parse(date).toString("yyyy_MM_dd");
+        boolean haveTable = this.haveStockHourTableByDate(todayTable);
+        if (!haveTable) {
+            // 如果表不存在，则创建小时表
+            this.createHourTable(todayTable);
+        }
+        // 非交易时间，且没有小时数据
+        boolean isInsertHourData = (!CommonUtils.isStockTradingTime(true) && !haveStockHourDataByDate(todayTable, date));
+        log.info("导入股票小时数据，当前时间：{},是否导入：{}", DateUtil.now(), isInsertHourData);
+        if (isInsertHourData) {
+            int insertHourData = this.insertHourData(todayTable, date);
+            log.info("导入股票小时数据完成，插入条数：{}", insertHourData);
+        }
+    }
+
 
     public List<StockData> parseStockData(String data) {
         List<StockData> stockList = new ArrayList<>();

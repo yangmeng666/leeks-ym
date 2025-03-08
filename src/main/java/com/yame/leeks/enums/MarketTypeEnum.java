@@ -22,7 +22,9 @@ public enum MarketTypeEnum {
     B_SHARES("B股", "B Shares", new String[]{"900", "200"}),
     ST("ST股", "Special Treatment Stocks", null),
     STAR_ST("*ST股", "Delisting Risk Warning Stocks", null),
-    REITS("REITs", "Real Estate Investment Trusts", null);
+    REITS("REITs", "Real Estate Investment Trusts", null),
+    CONVERTIBLE_BOND("可转债", "Convertible bond", new String[]{"11","12"}),
+    ;
 
     // 板块中文名称
     private final String chineseName;

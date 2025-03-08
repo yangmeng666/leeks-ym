@@ -11,6 +11,11 @@ import java.time.LocalTime;
  */
 public class CommonUtils {
 
+    /**
+     * 判断是否是交易时间
+     * @param isBiddingTime 是否包含竞价时间
+     * @return true：交易时间；false：非交易时间
+     */
     public static boolean isStockTradingTime(boolean isBiddingTime) {
         LocalDateTime now = LocalDateTime.now();
         DayOfWeek dayOfWeek = now.getDayOfWeek();
@@ -18,8 +23,8 @@ public class CommonUtils {
         if (isBiddingTime) {
             openTime = LocalTime.of(9, 15);
         }
-        LocalTime closeTime = LocalTime.of(15, 00,11);
-        LocalTime lunchBreakStart = LocalTime.of(11, 30);
+        LocalTime closeTime = LocalTime.of(15, 00,5);
+        LocalTime lunchBreakStart = LocalTime.of(11, 30,5);
         LocalTime lunchBreakEnd = LocalTime.of(13, 0);
 
         // Check if today is a weekday

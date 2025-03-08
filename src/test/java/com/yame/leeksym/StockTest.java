@@ -192,6 +192,25 @@ public class StockTest extends AbstractTestNGSpringContextTests {
     }
 
     @Test
+    public void testUpdateStock() {
+        stockService.updateRealData();
+    }
+
+    @Test
+    public void testHaveStockHourDataByDate() {
+        boolean yyyyMmDd = stockDataService.haveStockHourDataByDate(DateUtil.date().toString("yyyy_MM_dd"),DateUtil.today());
+        log.info("yyyyMmDd :{}", yyyyMmDd);
+    }
+    @Test
+    public void testCreateHourTable() {
+         stockDataService.createHourTable(DateUtil.date().toString("yyyy_MM_dd"));
+    }
+    @Test
+    public void testInsertStockHourData() {
+        stockDataService.insertStockHourData("2025-03-07");
+    }
+
+    @Test
     public void testInsertStockDatas() {
         stockDataService.insertRealDatas();
     }
