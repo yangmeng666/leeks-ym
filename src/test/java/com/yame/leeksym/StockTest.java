@@ -9,6 +9,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.yame.leeks.LeeksYmApplication;
 import com.yame.leeks.entity.Stock;
+import com.yame.leeks.entity.StockData;
 import com.yame.leeks.enums.ExchangeEnum;
 import com.yame.leeks.enums.MarketTypeEnum;
 import com.yame.leeks.service.StockDataService;
@@ -162,18 +163,18 @@ public class StockTest extends AbstractTestNGSpringContextTests {
         CountDownLatch countDownLatch = new CountDownLatch(partition.size());
         for (List<String> strings : partition) {
             new Thread(() -> {
-            String codes = String.join(",", strings);
-            URI uri = URI.create("http://qt.gtimg.cn/q=" + codes);
-            log.info("strings.size() :{} ,uri :{}", strings.size(),uri);
-            ResponseEntity<String> entity = restTemplate.getForEntity(uri, String.class);
-            List<Stock> stocks = parseStock(entity.getBody());
+                String codes = String.join(",", strings);
+                URI uri = URI.create("http://qt.gtimg.cn/q=" + codes);
+                log.info("strings.size() :{} ,uri :{}", strings.size(), uri);
+                ResponseEntity<String> entity = restTemplate.getForEntity(uri, String.class);
+                List<Stock> stocks = parseStock(entity.getBody());
                 for (Stock stock : stocks) {
                     if (dbStockMap.containsKey(stock.getSymbol())) {
                         stock.setId(dbStockMap.get(stock.getSymbol()).getId());
                     }
                 }
-            stockService.saveOrUpdateBatchBySymbol(dbStockMap.values().stream().collect(Collectors.toList()));
-            countDownLatch.countDown();
+                stockService.saveOrUpdateBatchBySymbol(dbStockMap.values().stream().collect(Collectors.toList()));
+                countDownLatch.countDown();
             }).start();
         }
         try {
@@ -198,22 +199,20 @@ public class StockTest extends AbstractTestNGSpringContextTests {
 
     @Test
     public void testHaveStockHourDataByDate() {
-        boolean yyyyMmDd = stockDataService.haveStockHourDataByDate(DateUtil.date().toString("yyyy_MM_dd"),DateUtil.today());
+        boolean yyyyMmDd = stockDataService.haveStockHourDataByDate(DateUtil.date().toString("yyyy_MM_dd"), DateUtil.today());
         log.info("yyyyMmDd :{}", yyyyMmDd);
     }
+
     @Test
     public void testCreateHourTable() {
-         stockDataService.createHourTable(DateUtil.date().toString("yyyy_MM_dd"));
-    }
-    @Test
-    public void testInsertStockHourData() {
-        stockDataService.insertStockHourData("2025-03-07");
+
     }
 
     @Test
     public void testInsertStockDatas() {
         stockDataService.insertRealDatas();
     }
+
     @Test
     public void testStockTaskDayData() {
         stockTask.updateStockDayData();
@@ -267,6 +266,227 @@ public class StockTest extends AbstractTestNGSpringContextTests {
             stockList.add(stock);
         }
         return stockList;
+    }
+
+    @Test
+    public void testUpdateStockDatas() {
+        List<Stock> stocks = stockService.list();
+        stocks.sort(Comparator.comparing(Stock::getCode));
+        List<List<Stock>> partition = ListUtil.partition(stocks, 1000);
+        Map<String, String> codeSymbolMap = partition.get(0).stream()
+                .filter(x -> !x.getCode().equals("000001"))
+                .collect(Collectors.toMap(Stock::getCode, Stock::getSymbol));
+        //CountDownLatch latch = new CountDownLatch(10);
+        for (String code : codeSymbolMap.keySet()) {
+            //new Thread(() -> {
+                QueryWrapper<StockData> queryWrapper = new QueryWrapper();
+                queryWrapper.eq("symbol", code);
+                List<StockData> stockDataList = stockDataService.list(queryWrapper);
+                if (ObjectUtil.isEmpty(stockDataList)) {
+                    continue;
+                }
+                for (StockData stockData : stockDataList) {
+                    stockData.setSymbol(codeSymbolMap.get(stockData.getSymbol()));
+                }
+                stockDataService.saveOrUpdateBatch(stockDataList);
+                log.info("1-code:{},stockDataList.size:{}", code, stockDataList.size());
+                //latch.countDown();
+            //}).start();
+        }
+        //try {
+        //    latch.await();
+        //} catch (
+        //        InterruptedException e) {
+        //    throw new RuntimeException(e);
+        //}
+
+    }
+    @Test
+    public void testUpdateStockDatas2() {
+        List<Stock> stocks = stockService.list();
+        stocks.sort(Comparator.comparing(Stock::getCode));
+        List<List<Stock>> partition = ListUtil.partition(stocks, 1000);
+        Map<String, String> codeSymbolMap = partition.get(1).stream()
+                .filter(x -> !x.getCode().equals("000001"))
+                .collect(Collectors.toMap(Stock::getCode, Stock::getSymbol));
+        //CountDownLatch latch = new CountDownLatch(10);
+        for (String code : codeSymbolMap.keySet()) {
+            //new Thread(() -> {
+                QueryWrapper<StockData> queryWrapper = new QueryWrapper();
+                queryWrapper.eq("symbol", code);
+                List<StockData> stockDataList = stockDataService.list(queryWrapper);
+                if (ObjectUtil.isEmpty(stockDataList)) {
+                    continue;
+                }
+                for (StockData stockData : stockDataList) {
+                    stockData.setSymbol(codeSymbolMap.get(stockData.getSymbol()));
+                }
+                stockDataService.saveOrUpdateBatch(stockDataList);
+                log.info("2-code:{},stockDataList.size:{}", code, stockDataList.size());
+                //latch.countDown();
+            //}).start();
+        }
+        //try {
+        //    latch.await();
+        //} catch (
+        //        InterruptedException e) {
+        //    throw new RuntimeException(e);
+        //}
+
+    }
+    @Test
+    public void testUpdateStockDatas3() {
+        List<Stock> stocks = stockService.list();
+        stocks.sort(Comparator.comparing(Stock::getCode));
+        List<List<Stock>> partition = ListUtil.partition(stocks, 1000);
+        Map<String, String> codeSymbolMap = partition.get(2).stream()
+                .filter(x -> !x.getCode().equals("000001"))
+                .collect(Collectors.toMap(Stock::getCode, Stock::getSymbol));
+        //CountDownLatch latch = new CountDownLatch(10);
+        int count=0;
+        for (String code : codeSymbolMap.keySet()) {
+            //new Thread(() -> {
+                QueryWrapper<StockData> queryWrapper = new QueryWrapper();
+                queryWrapper.eq("symbol", code);
+                List<StockData> stockDataList = stockDataService.list(queryWrapper);
+                if (ObjectUtil.isEmpty(stockDataList)) {
+                    continue;
+                }
+                for (StockData stockData : stockDataList) {
+                    stockData.setSymbol(codeSymbolMap.get(stockData.getSymbol()));
+                }
+                stockDataService.updateBatchBySymbol(stockDataList);
+                log.info("3-code:{},stockDataList.size:{},codeSymbolMap:{},count:{}", code, stockDataList.size(),codeSymbolMap.keySet().size(),count++);
+                //latch.countDown();
+            //}).start();
+        }
+        //try {
+        //    latch.await();
+        //} catch (
+        //        InterruptedException e) {
+        //    throw new RuntimeException(e);
+        //}
+
+    }
+    @Test
+    public void testUpdateStockDatas4() {
+        List<Stock> stocks = stockService.list();
+        stocks.sort(Comparator.comparing(Stock::getCode));
+        List<List<Stock>> partition = ListUtil.partition(stocks, 1000);
+        Map<String, String> codeSymbolMap = partition.get(3).stream()
+                .filter(x -> !x.getCode().equals("000001"))
+                .collect(Collectors.toMap(Stock::getCode, Stock::getSymbol));
+        //CountDownLatch latch = new CountDownLatch(10);
+        int count=0;
+        for (String code : codeSymbolMap.keySet()) {
+            //new Thread(() -> {
+                QueryWrapper<StockData> queryWrapper = new QueryWrapper();
+                queryWrapper.eq("symbol", code);
+                List<StockData> stockDataList = stockDataService.list(queryWrapper);
+                if (ObjectUtil.isEmpty(stockDataList)) {
+                    continue;
+                }
+                for (StockData stockData : stockDataList) {
+                    stockData.setSymbol(codeSymbolMap.get(stockData.getSymbol()));
+                }
+                stockDataService.updateBatchBySymbol(stockDataList);
+            log.info("4-code:{},stockDataList.size:{},codeSymbolMap:{},count:{}", code, stockDataList.size(),codeSymbolMap.keySet().size(),count++);
+                //latch.countDown();
+            //}).start();
+        }
+      log.info("complete.......................");
+
+    }
+    @Test
+    public void testUpdateStockDatas5() {
+        List<Stock> stocks = stockService.list();
+        stocks.sort(Comparator.comparing(Stock::getCode));
+        List<List<Stock>> partition = ListUtil.partition(stocks, 1000);
+        Map<String, String> codeSymbolMap = partition.get(4).stream()
+                .filter(x -> !x.getCode().equals("000001"))
+                .collect(Collectors.toMap(Stock::getCode, Stock::getSymbol));
+        //CountDownLatch latch = new CountDownLatch(10);
+        int count=0;
+        for (String code : codeSymbolMap.keySet()) {
+            //new Thread(() -> {
+                QueryWrapper<StockData> queryWrapper = new QueryWrapper();
+                queryWrapper.eq("symbol", code);
+                List<StockData> stockDataList = stockDataService.list(queryWrapper);
+                if (ObjectUtil.isEmpty(stockDataList)) {
+                    continue;
+                }
+                for (StockData stockData : stockDataList) {
+                    stockData.setSymbol(codeSymbolMap.get(stockData.getSymbol()));
+                }
+                stockDataService.updateBatchBySymbol(stockDataList);
+            log.info("5-code:{},stockDataList.size:{},codeSymbolMap:{},count:{}", code, stockDataList.size(),codeSymbolMap.keySet().size(),count++);
+                //latch.countDown();
+            //}).start();
+        }
+        log.info("complete.......................");
+
+    }
+    @Test
+    public void testUpdateStockDatas6() {
+        List<Stock> stocks = stockService.list();
+        stocks.sort(Comparator.comparing(Stock::getCode));
+        List<List<Stock>> partition = ListUtil.partition(stocks, 1000);
+        Map<String, String> codeSymbolMap = partition.get(5).stream()
+                .filter(x -> !x.getCode().equals("000001"))
+                .collect(Collectors.toMap(Stock::getCode, Stock::getSymbol));
+        //CountDownLatch latch = new CountDownLatch(10);
+        int count=0;
+        for (String code : codeSymbolMap.keySet()) {
+            //new Thread(() -> {
+                QueryWrapper<StockData> queryWrapper = new QueryWrapper();
+                queryWrapper.eq("symbol", code);
+                List<StockData> stockDataList = stockDataService.list(queryWrapper);
+                if (ObjectUtil.isEmpty(stockDataList)) {
+                    continue;
+                }
+                for (StockData stockData : stockDataList) {
+                    stockData.setSymbol(codeSymbolMap.get(stockData.getSymbol()));
+                }
+                stockDataService.updateBatchBySymbol(stockDataList);
+            log.info("6-code:{},stockDataList.size:{},codeSymbolMap:{},count:{}", code, stockDataList.size(),codeSymbolMap.keySet().size(),count++);
+                //latch.countDown();
+            //}).start();
+        }
+        log.info("complete.......................");
+
+    }
+
+
+    @Test
+    public void testDeleteStockData() {
+        List<Stock> stocks = stockService.list();
+        stocks.sort(Comparator.comparing(Stock::getCode));
+        Map<String, String> codeSymbolMap = stocks.stream()
+                .filter(x -> !x.getCode().equals("000001"))
+                .collect(Collectors.toMap(Stock::getCode, Stock::getSymbol));
+        int count = 0;
+        codeSymbolMap.keySet().add("sh000001");
+        codeSymbolMap.keySet().add("sz000001");
+        for (String code : codeSymbolMap.keySet()) {
+            count++;
+            QueryWrapper<StockData> queryWrapper = new QueryWrapper();
+            queryWrapper.likeRight("symbol", code);
+            queryWrapper.orderByAsc("tick_time");
+            List<StockData> stockDataList = stockDataService.list(queryWrapper);
+            if (ObjectUtil.isEmpty(stockDataList)) {
+                continue;
+            }
+            HashSet times = new HashSet();
+            List<Long> deletedIds = new ArrayList<>();
+            for (StockData stockData : stockDataList) {
+                String time = DateUtil.format(stockData.getTickTime(), "yyyy-MM-dd HH:mm");
+                if(!times.add(time)){
+                    deletedIds.add(stockData.getId());
+                }
+            }
+            this.stockDataService.removeBatchByIds(deletedIds);
+                log.info("count():{},symbol:{},stockDataList.size():{},deleteIds.size():{}",count,code,stockDataList.size(),deletedIds.size());
+        }
     }
 
 }

@@ -12,6 +12,7 @@ import com.yame.leeks.service.StockService;
 import com.yame.leeks.utils.CommonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.web.format.DateTimeFormatters;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -20,6 +21,7 @@ import java.math.BigDecimal;
 import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -46,7 +48,7 @@ public class StockDataServiceImpl extends ServiceImpl<StockDataMapper, StockData
     @Override
     public void insertRealDatas() {
         long start = System.currentTimeMillis();
-        List<Stock> dbStocks = stockService.getBaseMapper().selectList(null);
+        List<Stock> dbStocks = stockService.list();
         List<String> stockCodes = dbStocks.stream().map(Stock::getSymbol).collect(Collectors.toList());
         // 补充上证指数
         stockCodes.add("sh000001");
@@ -97,34 +99,50 @@ public class StockDataServiceImpl extends ServiceImpl<StockDataMapper, StockData
         return this.baseMapper.haveStockHourDataByDate(todayTable, date);
     }
 
-    @Override
-    public void createHourTable(String todayTable) {
-        this.baseMapper.createHourTable(todayTable);
-    }
 
     @Override
-    public int insertHourData(String tableName, String date) {
-        return this.baseMapper.insertHourData(tableName, date);
-    }
-
-    @Override
-    public void insertStockHourData(String date) {
+    public void handleStockDataDayData(String date) {
         if (StrUtil.isBlank(date)) {
             date = DateUtil.today();
         }
         String todayTable = DateUtil.parse(date).toString("yyyy_MM_dd");
-        boolean haveTable = this.haveStockHourTableByDate(todayTable);
-        if (!haveTable) {
-            // 如果表不存在，则创建小时表
-            this.createHourTable(todayTable);
+        boolean haveStockDataDateTable = this.haveStockHourTableByDate(todayTable);
+        if(!haveStockDataDateTable) {
+            boolean haveStockDataTable = this.baseMapper.haveStockDataTable();
+            boolean haveStockData = this.baseMapper.haveStockDataByDate(date);
+            if (!CommonUtils.isStockTradingTime(true) && CommonUtils.isStockTradingDay()&&haveStockDataTable && haveStockData) {
+                // 如果表不存在 且 stock_data_day 当天有数据，修改 stock_data 表明 为stock_data_当天日期
+                this.baseMapper.renameStockDataDayTable(todayTable);
+                // 创建新的 stock_data_day
+                this.baseMapper.createStockDataDayTable();
+                log.info("修改 stock_data_day 为当天表,当前时间{},tableName:stock_data_{}", DateUtil.now(),todayTable);
+            }else{
+                log.info("非交易日,无需处理stock_data_day当天小时数据");
+            }
+        }else{
+            log.info("当天小时数据stock_data_{}已存在,当前时间{}",todayTable, DateUtil.now());
         }
-        // 非交易时间，且没有小时数据
-        boolean isInsertHourData = (!CommonUtils.isStockTradingTime(true) && !haveStockHourDataByDate(todayTable, date));
-        log.info("导入股票小时数据，当前时间：{},是否导入：{}", DateUtil.now(), isInsertHourData);
-        if (isInsertHourData) {
-            int insertHourData = this.insertHourData(todayTable, date);
-            log.info("导入股票小时数据完成，插入条数：{}", insertHourData);
+    }
+
+    @Override
+    public void handleStockDataMonthData(String today) {
+        if(StrUtil.isBlank(today)){
+            today = DateUtil.today();
         }
+        String monthTable = DateUtil.parse(today).toLocalDateTime().plusMonths(-1).format(DateTimeFormatter.ofPattern("yyyy_MM"));
+        //判断是否有上月表
+        boolean haveStockDataMonthTable =  this.baseMapper.haveStockDataMonthTable(monthTable);
+        if(!haveStockDataMonthTable){
+            //没有上月表 则修改当前月份表名为上月表
+            this.baseMapper.renameStockDataMonthTable(monthTable);
+            //新建 当月表
+            this.baseMapper.createStockDataMonthTable();
+        }
+    }
+
+    @Override
+    public void updateBatchBySymbol(List<StockData> stockDataList) {
+        this.baseMapper.updateBatchBySymbol(stockDataList);
     }
 
 
@@ -132,13 +150,15 @@ public class StockDataServiceImpl extends ServiceImpl<StockDataMapper, StockData
         List<StockData> stockList = new ArrayList<>();
         String[] lines = data.split("\n");
         for (String line : lines) {
+            String symbol = line.substring(line.indexOf("_") + 1, line.indexOf("="));
             String dataStr = line.substring(line.indexOf("=") + 2, line.length() - 2);
             // 按 ~ 分割字段
             String[] fields = dataStr.split("~");
             // 创建 Stock 对象
             StockData stockData = new StockData();
             // 解析字段
-            stockData.setSymbol(fields[2]);   // 股票代码
+//            stockData.setSymbol(fields[2]);   // 股票代码
+            stockData.setSymbol(symbol);   // 股票代码
             stockData.setTrade(new BigDecimal(fields[3]));      // 当前交易价格
             stockData.setPriceChange(new BigDecimal(fields[31])); // 涨跌
             stockData.setChangePercent(new BigDecimal(fields[32])); // 涨跌幅

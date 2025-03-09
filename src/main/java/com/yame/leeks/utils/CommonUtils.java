@@ -23,9 +23,9 @@ public class CommonUtils {
         if (isBiddingTime) {
             openTime = LocalTime.of(9, 15);
         }
-        LocalTime closeTime = LocalTime.of(15, 00,5);
         LocalTime lunchBreakStart = LocalTime.of(11, 30,5);
         LocalTime lunchBreakEnd = LocalTime.of(13, 0);
+        LocalTime closeTime = LocalTime.of(15, 00,5);
 
         // Check if today is a weekday
         if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
@@ -40,7 +40,21 @@ public class CommonUtils {
                 return true;
             }
         }
-
         return false;
     }
+
+    /**
+     * 判断今天是否是交易日
+     * @return
+     */
+
+    public static boolean isStockTradingDay(){
+        LocalDateTime now = LocalDateTime.now();
+        DayOfWeek dayOfWeek = now.getDayOfWeek();
+        if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
+            return false;
+        }
+        return true;
+    }
+
 }

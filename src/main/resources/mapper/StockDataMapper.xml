@@ -3,7 +3,7 @@
 <mapper namespace="com.yame.leeks.mapper.StockDataMapper">
 
     <insert id="saveBatchList" parameterType="java.util.List">
-        INSERT INTO stock_data (id, symbol, trade, price_change, change_percent, open, high, low, volume, amount,
+        INSERT INTO stock_data_day (id, symbol, trade, price_change, change_percent, open, high, low, volume, amount,
         inside_dish, outer_disc, turnover_ratio, tick_time, update_time)
         VALUES
         <foreach collection="list" item="stock" separator=",">
@@ -13,7 +13,7 @@
         </foreach>
     </insert>
     <insert id="insertOrUpdateDayDatas">
-        INSERT INTO stock_day_data (id, symbol, trade, price_change, change_percent, open, high, low, volume, amount,
+        INSERT INTO stock_data_month (id, symbol, trade, price_change, change_percent, open, high, low, volume, amount,
         inside_dish, outer_disc, turnover_ratio, tick_time, update_time)
         VALUES
         <foreach collection="list" item="item" separator=",">
@@ -39,8 +39,8 @@
         VALUES (tick_time), turnover_ratio =
         VALUES (turnover_ratio), update_time = NOW();
     </insert>
-    <insert id="createHourTable">
-        CREATE TABLE if not exists `stock_data_${todayTable}` (
+    <insert id="createStockDataDayTable">
+        CREATE TABLE if not exists `stock_data_day` (
              `id` bigint NOT NULL COMMENT '主键ID',
              `symbol` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '股票代码',
              `trade` decimal(10,3) NOT NULL COMMENT '当前交易价格',
@@ -57,20 +57,19 @@
              `tick_time` datetime NOT NULL COMMENT '数据更新时间',
              `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
              PRIMARY KEY (`id`) USING BTREE,
-             KEY `index_code` (`code`) USING BTREE,
+             KEY `index_symbol` (`symbol`) USING BTREE,
              KEY `index_tick_time` (`tick_time`) USING BTREE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='股票日数据表';
     </insert>
-    <insert id="insertHourData">
-        insert into `stock_data_${todayTable}`
-        select *
-        from stock_data
-        where date (tick_time) =#{date}
-    </insert>
     <select id="haveStockDayDataByDate" resultType="java.lang.Boolean">
         SELECT COUNT(1) > 0
-        FROM stock_day_data
-        WHERE tick_time = #{today}
+        FROM stock_data_month
+        WHERE tick_time = #{today} limit 1
+    </select>
+    <select id="haveStockDataByDate" resultType="java.lang.Boolean">
+        SELECT COUNT(1) > 0
+        FROM stock_data_day
+        WHERE tick_time = #{today} limit 1
     </select>
     <select id="haveStockHourTableByDate" resultType="java.lang.Boolean">
         SELECT count(TABLE_NAME) > 0
@@ -78,9 +77,64 @@
         WHERE TABLE_SCHEMA = 'leeks'
           AND TABLE_NAME = concat('stock_data_', #{date});
     </select>
+    <select id="haveStockDataTable" resultType="java.lang.Boolean">
+        SELECT count(TABLE_NAME) > 0
+        FROM information_schema.TABLES
+        WHERE TABLE_SCHEMA = 'leeks'
+          AND TABLE_NAME = 'stock_data_day';
+    </select>
     <select id="haveStockHourDataByDate" resultType="java.lang.Boolean">
         SELECT COUNT(1) > 0
         FROM `stock_data_${todayTable}`
-        WHERE tick_time = #{date}
+        WHERE tick_time = #{date} limit 1
     </select>
+    <insert id="renameStockDataDayTable">
+        rename table stock_data_day to stock_data_${todayTable};
+    </insert>
+
+    <select id="haveStockDataMonthTable" resultType="boolean">
+        SELECT count(TABLE_NAME) > 0
+        FROM information_schema.TABLES
+        WHERE TABLE_SCHEMA = 'leeks'
+        AND TABLE_NAME = concat('stock_data_', #{date});
+    </select>
+    <insert id="renameStockDataMonthTable">
+        rename table stock_data_month to stock_data_${monthTable};
+    </insert>
+
+    <insert id="createStockDataMonthTable">
+        CREATE TABLE `stock_data_month` (
+        `id` bigint NOT NULL COMMENT '主键ID',
+        `symbol` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '完整股票代码',
+        `trade` decimal(10,3) NOT NULL COMMENT '当前交易价格',
+        `price_change` decimal(10,3) NOT NULL COMMENT '涨跌',
+        `change_percent` decimal(10,3) NOT NULL COMMENT '涨跌幅',
+        `open` decimal(10,3) NOT NULL COMMENT '当日开盘价',
+        `high` decimal(10,3) NOT NULL COMMENT '当日最高价',
+        `low` decimal(10,3) NOT NULL COMMENT '当日最低价',
+        `volume` bigint NOT NULL COMMENT '当日成交量',
+        `amount` decimal(65,3) NOT NULL COMMENT '当日成交金额',
+        `inside_dish` bigint DEFAULT NULL COMMENT '内盘（主动卖出的成交量）',
+        `outer_disc` bigint DEFAULT NULL COMMENT '外盘（主动买入的成交量）',
+        `turnover_ratio` decimal(10,5) DEFAULT NULL COMMENT '换手率',
+        `tick_time` date NOT NULL COMMENT '日期',
+        `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+        PRIMARY KEY (`id`) USING BTREE,
+        UNIQUE KEY `unique_code_tick_time` (`symbol`,`tick_time`) USING BTREE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='股票天粒度数据表(每支股票每天只有一条数据)';
+    </insert>
+
+    <update id="updateBatchBySymbol" parameterType="java.util.List">
+            UPDATE stock_data_2025_03_06
+            SET symbol = CASE
+            <foreach collection="list" item="item" index="index">
+                WHEN id = #{item.id} THEN #{item.symbol}
+            </foreach>
+            ELSE symbol
+            END
+            WHERE id IN
+            <foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+                #{item.id}
+            </foreach>
+    </update>
 </mapper>

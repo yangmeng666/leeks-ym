@@ -52,11 +52,20 @@ public class StockTask {
      * 插入每分钟的股票数据
      */
     @Scheduled(cron = "0 * 9,10,11,13,14,15 * * ? ")
-    public void updateStockData() {
-        if (CommonUtils.isStockTradingTime(true)) {
-            log.info("获取股票数据，当前时间：{}", DateUtil.now());
+    public void insertRealDatas() {
+        if (CommonUtils.isStockTradingTime(false)) {
             stockDataService.insertRealDatas();
-            log.info("获取股票数据insertRealDatas完成，当前时间：{}", DateUtil.now());
+            log.info("插入每分钟的股票数据，insertRealDatas，完成，当前时间：{}", DateUtil.now());
+        }
+    }
+    /**
+     * 定时任务，每天9:15~9:30插入 3条竞价数据
+     */
+    @Scheduled(cron = "0 16,21,26 9 * * ? ")
+    public void insertBiddingRealDatas() {
+        if (CommonUtils.isStockTradingTime(true)) {
+            stockDataService.insertRealDatas();
+            log.info("插入竞价的股票数据insertBiddingRealDatas完成，当前时间：{}", DateUtil.now());
         }
     }
 
@@ -69,7 +78,7 @@ public class StockTask {
     @Scheduled(cron = "0 0/10 15-20 * * ?")
     public void updateStockDayData() {
         // 非交易时间，且没有日线数据
-        boolean isFlusDayData = (!CommonUtils.isStockTradingTime(true))
+        boolean isFlusDayData = (!CommonUtils.isStockTradingTime(true))&&CommonUtils.isStockTradingDay()
                 &&(!stockDataService.haveStockDayDataByDate(DateUtil.today()));
         log.info("导入股票日线数据，当前时间：{},是否导入：{}", DateUtil.now(),isFlusDayData);
         if (isFlusDayData) {
@@ -80,19 +89,22 @@ public class StockTask {
         }
     }
 
+    /**
+     * 定时任务 处理每天的数据 拆表保存
+     */
     @Scheduled(cron = "0 0/10 15-20 * * ?")
-    public void insertStockHourData() {
-        stockDataService.insertStockHourData(DateUtil.today());
+    public void handleStockDataDayData() {
+        stockDataService.handleStockDataDayData(DateUtil.today());
+    }
+    /**
+     * 定时任务，非交易时间内 每10分钟执行一次
+     * 插入每月的股票日线数据
+     * 有数据则不插入
+     * 没有数据则插入
+     */
+    @Scheduled(cron = "0 0 8-15 1 * ? ")
+    public void handleStockDataMonthData() {
+        stockDataService.handleStockDataMonthData(DateUtil.today());
     }
 
-
-
-  /*  long execTime = DateUtil.date().getTime();
-    long amStartTime = DateUtil.parse(DateUtil.today() + " 09:15:00").getTime();
-    long amEndTime = DateUtil.parse(DateUtil.today() + " 11:30:00").getTime();
-    long pmStartTime = DateUtil.parse(DateUtil.today() + " 13:00:00").getTime();
-    long pmEndTime = DateUtil.parse(DateUtil.today() + " 15:00:00").getTime();
-        if ((execTime >= amStartTime && execTime <= amEndTime) || (execTime >= pmStartTime && execTime <= pmEndTime)) {
-        log.info("刷新股票数据，当前时间：{}", DateUtil.now());
-        stockService.updateRealData()*/;
 }

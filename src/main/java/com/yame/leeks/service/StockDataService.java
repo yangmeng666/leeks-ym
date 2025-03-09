@@ -46,9 +46,10 @@ public interface StockDataService extends IService<StockData> {
      */
     boolean haveStockHourDataByDate(String todayTable,String date);
 
-    void createHourTable(String todayTable);
 
-    int insertHourData(String tableName, String date);
+    void handleStockDataDayData(String today);
 
-    void insertStockHourData(String today);
+    void handleStockDataMonthData(String today);
+
+    void updateBatchBySymbol(List<StockData> stockDataList);
 }

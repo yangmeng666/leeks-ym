@@ -20,9 +20,32 @@ public interface StockDataMapper extends BaseMapper<StockData> {
 
     boolean haveStockDayDataByDate(String today);
 
-    boolean haveStockHourTableByDate(String date);
-    boolean haveStockHourDataByDate(String todayTable,String date);
-    void createHourTable(String todayTable);
+    /**
+     * 判断 stock_data_day 是否有当天数据
+     * @param today
+     * @return
+     */
+    boolean haveStockDataByDate(String today);
 
-    int insertHourData(String todayTable,String date);
+    boolean haveStockHourTableByDate(String date);
+
+    /**
+     * 判断是否有stock_data 表是否存在
+     * @return
+     */
+    boolean haveStockDataTable();
+
+    boolean haveStockHourDataByDate(String todayTable,String date);
+
+    void renameStockDataDayTable(String todayTable);
+
+    void createStockDataDayTable();
+
+    boolean haveStockDataMonthTable(String monthTable);
+
+    void renameStockDataMonthTable(String monthTable);
+
+    void createStockDataMonthTable();
+
+    void updateBatchBySymbol(List<StockData> stockDataList);
 }
