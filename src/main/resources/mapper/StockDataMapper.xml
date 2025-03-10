@@ -64,12 +64,12 @@
     <select id="haveStockDayDataByDate" resultType="java.lang.Boolean">
         SELECT COUNT(1) > 0
         FROM stock_data_month
-        WHERE tick_time = #{today} limit 1
+        WHERE date(tick_time) = #{today} limit 1
     </select>
     <select id="haveStockDataByDate" resultType="java.lang.Boolean">
         SELECT COUNT(1) > 0
         FROM stock_data_day
-        WHERE tick_time = #{today} limit 1
+        WHERE date(tick_time) = #{today} limit 1
     </select>
     <select id="haveStockHourTableByDate" resultType="java.lang.Boolean">
         SELECT count(TABLE_NAME) > 0
@@ -86,7 +86,7 @@
     <select id="haveStockHourDataByDate" resultType="java.lang.Boolean">
         SELECT COUNT(1) > 0
         FROM `stock_data_${todayTable}`
-        WHERE tick_time = #{date} limit 1
+        WHERE date(tick_time) = #{date} limit 1
     </select>
     <insert id="renameStockDataDayTable">
         rename table stock_data_day to stock_data_${todayTable};
