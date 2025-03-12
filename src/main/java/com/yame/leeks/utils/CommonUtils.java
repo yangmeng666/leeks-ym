@@ -23,9 +23,9 @@ public class CommonUtils {
         if (isBiddingTime) {
             openTime = LocalTime.of(9, 15);
         }
-        LocalTime lunchBreakStart = LocalTime.of(11, 30,5);
+        LocalTime lunchBreakStart = LocalTime.of(11, 30,10);
         LocalTime lunchBreakEnd = LocalTime.of(13, 0);
-        LocalTime closeTime = LocalTime.of(15, 00,5);
+        LocalTime closeTime = LocalTime.of(15, 00,10);
 
         // Check if today is a weekday
         if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {

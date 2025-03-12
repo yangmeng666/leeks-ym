@@ -23,7 +23,7 @@ import java.util.Date;
  * @Created by yangmeng
  */
 @Data
-@TableName("stock_data")
+@TableName("stock_data_day")
 @ApiModel(value = "股票数据")
 public class StockData {
     private static final Snowflake idWorker = IdUtil.createSnowflake(1, 1);

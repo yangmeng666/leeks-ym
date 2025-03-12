@@ -72,7 +72,12 @@ class LeeksYmApplicationTests extends AbstractTestNGSpringContextTests {
 
     @Test
     public void testFlush() {
-        fundService.updateLastGsjz(false);
+        fundService.updateLastGsjz(true);
+    }
+    @Test
+    public void realDataFlushGsjz() {
+        Fund fund = fundService.getById(21330);
+        fundService.realDataFlushGsjz(fund);
     }
 
     @Test
@@ -101,8 +106,10 @@ class LeeksYmApplicationTests extends AbstractTestNGSpringContextTests {
             fund.setCategory(fundArray.get(3).toString());
             funds.add(fund);
         }
-        System.out.println(funds.subList(0, 5));
+        //System.out.println(funds.subList(0, 5));
+        fundService.saveOrUpdateBatch(funds);
     }
+
 
     @Test
     public void testRealData() {

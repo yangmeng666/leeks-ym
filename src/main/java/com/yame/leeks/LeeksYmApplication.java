@@ -7,7 +7,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication
-//@EnableScheduling
+@EnableScheduling
 @MapperScan("com.yame.leeks.mapper.**")
 @EnableTransactionManagement
 public class LeeksYmApplication {
